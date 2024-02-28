@@ -1,0 +1,31 @@
+COMMON_ELEMENT:  # 通用功能
+  # 童锁
+  CHILD_LOCK: com.govee.home:id/iv_lock_switch
+  # 显示
+  SHOW: com.govee.home:id/iv_light_indicator_switch
+  # 夜灯
+  NIGHT_LIGHT: com.govee.home:id/iv_light_rgb_switch_ext1
+  # 定时
+  TIMER: com.govee.home:id/tv_timer_title
+  # 延时关闭
+  DELAY: com.govee.home:id/tv_delay_off_title
+  # 添加温湿度计
+  ADD_TEMP: com.govee.home:id/tv_bind_temperature_title
+
+HEATER_ELEMENT:  # 取暖器
+  LOW: com.govee.home:id/iv_gear_low_icon
+  MEDIUM: com.govee.home:id/iv_gear_mid_icon
+  HIGH: com.govee.home:id/iv_gear_high_icon
+  AUTO: com.govee.home:id/iv_auto_icon
+  FAN: com.govee.home:id/iv_fan_icon
+  # 摇头
+  SHAKE_HEAD: com.govee.home:id/iv_shake_switch
+
+HUMIDIFIER_ELEMENT:  # 加湿器
+  GEAR: com.govee.home:id/iv_gear_icon
+  CUSTOM: com.govee.home:id/iv_custom_icon
+  AUTO: com.govee.home:id/iv_auto_icon
+  # 热雾
+  HOT_FOG: com.govee.home:id/ivSwitch
+
+

@@ -1,0 +1,7 @@
+pyinstaller GoveeTestTool.py --noconsole --hidden-import PySide2.QtXml
+
+pyinstaller  --exclude-module unnecessary_module GoveeTestTool.py --workpath c:\APPAutoTool\dist --distpath c:\APPAutoTool --runtime-hook="runtimehook.py"
+
+pyinstaller --onefile GoveeTestTool.py --noconsole  --distpath c:\APPAutoTool --runtime-hook="runtimehook.py"
+pyinstaller --onefile GoveeTestTool.py  --distpath c:\APPAutoTool --runtime-hook="runtimehook.py"
+
