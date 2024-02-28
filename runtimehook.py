@@ -3,7 +3,7 @@
 # @Time    : 
 # @Author  : 
 # @File    : 
-# @Description : 作用
+# @Description : 程序打包配置
 
 import sys
 import os

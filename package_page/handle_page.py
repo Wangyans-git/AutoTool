@@ -3,7 +3,7 @@
 # @Time    : 
 # @Author  : 
 # @File    : 
-# @Description : 定位操作
+# @Description : app页面定位操作
 import datetime
 import time
 import serial

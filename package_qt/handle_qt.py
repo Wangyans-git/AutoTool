@@ -3,7 +3,7 @@
 # @Time    :
 # @Author  :
 # @File    :
-# @Description : 处理串口
+# @Description : 处理qt页面
 import datetime
 import os
 import sys

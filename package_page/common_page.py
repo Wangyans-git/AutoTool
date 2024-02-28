@@ -3,7 +3,7 @@
 # @Time    : 
 # @Author  : 
 # @File    : 
-# @Description : 作用
+# @Description : 页面公共元素
 import datetime
 import os
 import time
