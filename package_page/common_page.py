@@ -20,7 +20,7 @@ class CommonPage:
         self.device = u2.connect_usb()
         self.device.app_start('com.govee.home')
         self.device.settings['wait_timeout'] = 10  # 元素等待时间30s
-        self.device.settings['operation_delay'] = 0.5  # 每次点击后等待1s
+        self.device.settings['operation_delay'] = 0.1  # 每次点击后等待1s
         # 脚本日志
         if os.path.exists("C:\\logs"):
             self.get_log = GetLog(r"C:\logs\\app测试数据.log")
@@ -43,10 +43,12 @@ class CommonPage:
             self.get_log.info("进入{0}详情页成功".format(sku))
             return True
         else:
-
             # 退出详情页
             try:
-                self.device(resourceId="com.govee.home:id/btn_back").click_exists(timeout=5.0)
+                if self.device(resourceId="com.govee.home:id/btn_back").exists():
+                    self.device(resourceId="com.govee.home:id/btn_back").click_exists(timeout=5.0)
+                elif self.device(resourceId="com.govee.home:id/ivBack").exists():
+                    self.device(resourceId="com.govee.home:id/ivBack").click_exists(timeout=5.0)
                 print("30秒还未进入详情页，连接设备失败，退出详情页")
                 self.get_log.info('30秒还未进入详情页，连接设备失败，退出详情页')
             except Exception as e:
@@ -113,19 +115,19 @@ class CommonPage:
     def handle_pop(self):
         if self.device(resourceId='com.govee.home:id/btn_cancel').exists():
             self.device(resourceId='com.govee.home:id/btn_cancel').click_exists(timeout=2)
-            self.get_log.info("又有弹窗了，哪里来的？")
+            self.get_log.info("有彈窗")
         elif self.device(resourceId='com.govee.home:id/dialog_done').exists():
             self.device(resourceId='com.govee.home:id/dialog_done').click_exists(timeout=2)
-            self.get_log.info("又有弹窗了，哪里来的？")
+            self.get_log.info("有彈窗")
         elif self.device(resourceId='com.govee.home:id/btn_done').exists():
             self.device(resourceId='com.govee.home:id/btn_done').click_exists(timeout=2)
-            self.get_log.info("又有弹窗了，哪里来的？")
+            self.get_log.info("有彈窗")
         elif self.device(resourceId='com.govee.home:id/btn_got_it').exists():
             self.device(resourceId='com.govee.home:id/btn_got_it').click_exists(timeout=2)
-            self.get_log.info("又有弹窗了，哪里来的？")
+            self.get_log.info("有彈窗")
         elif self.device(text='知道了').exists():
             self.device(text='知道了').click_exists(timeout=2)
-            self.get_log.info("又有弹窗了，哪里来的？")
+            self.get_log.info("有彈窗")
         else:
             pass
 
@@ -251,37 +253,39 @@ class CommonPage:
 
     # 自定义
     def humi_diy(self):
-        self.device(resourceId='com.govee.home:id/iv_custom_icon').click_exists(timeout=5)
-        self.handle_pop()
-        if self.check_connect():
-            self.get_log.info("切换至自定义模式成功！")
+        if self.device(resourceId='com.govee.home:id/iv_custom_icon').exists():
+            self.device(resourceId='com.govee.home:id/iv_custom_icon').click_exists(timeout=5)
+            self.handle_pop()
+            if self.check_connect():
+                self.get_log.info("切换至自定义模式成功！")
+            else:
+                self.get_log.error("切换自定义模式后连接失败！")
+            self.device.xpath(
+                '//*[@resource-id="com.govee.home:id/custom_item_2"]/android.widget.ImageView[4]').click_exists(
+                timeout=5)
+            self.handle_pop()
+            if self.check_connect():
+                self.get_log.info("切换至自定义任务二成功！")
+            else:
+                self.get_log.error("切换至自定义任务二后连接失败！")
+            self.device.xpath(
+                '//*[@resource-id="com.govee.home:id/custom_item_3"]/android.widget.ImageView[3]').click_exists(
+                timeout=5)
+            self.handle_pop()
+            if self.check_connect():
+                self.get_log.info("切换至自定义任务三成功！")
+            else:
+                self.get_log.error("切换至自定义任务三后连接失败！")
+            self.device.xpath(
+                '//*[@resource-id="com.govee.home:id/custom_item_1"]/android.widget.ImageView[5]').click_exists(
+                timeout=5)
+            self.handle_pop()
+            if self.check_connect():
+                self.get_log.info("切换至自定义任务一成功！")
+            else:
+                self.get_log.error("切换至自定义任务一后连接失败！")
         else:
-            self.get_log.error("切换自定义模式后连接失败！")
-        self.device.xpath(
-            '//*[@resource-id="com.govee.home:id/custom_item_2"]/android.widget.ImageView[4]').click_exists(
-            timeout=5)
-        self.handle_pop()
-        if self.check_connect():
-            self.get_log.info("切换至自定义任务二成功！")
-        else:
-            self.get_log.error("切换至自定义任务二后连接失败！")
-        self.device.xpath(
-            '//*[@resource-id="com.govee.home:id/custom_item_3"]/android.widget.ImageView[3]').click_exists(
-            timeout=5)
-        self.handle_pop()
-        if self.check_connect():
-            self.get_log.info("切换至自定义任务三成功！")
-        else:
-            self.get_log.error("切换至自定义任务三后连接失败！")
-        self.device.xpath(
-            '//*[@resource-id="com.govee.home:id/custom_item_1"]/android.widget.ImageView[5]').click_exists(
-            timeout=5)
-        self.handle_pop()
-        if self.check_connect():
-            self.get_log.info("切换至自定义任务一成功！")
-        else:
-            self.get_log.error("切换至自定义任务一后连接失败！")
-
+            pass
     # 自动档
     def humi_auto(self):
         self.device(resourceId='com.govee.home:id/iv_auto_icon').click_exists(timeout=5)

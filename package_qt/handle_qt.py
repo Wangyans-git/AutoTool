@@ -12,17 +12,18 @@ import time
 from pathlib import Path
 
 import serial
-
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QWidget
-from PySide2.QtWidgets import QMessageBox
+
 from logs.get_log import GetLog
 from package_config.common_config import ConFig
 from package_page.handle_page import HandlePage
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
-log_file = str(Path(ROOT) /"config")
+log_file = str(Path(ROOT) / "config")
+
+
 # print(log_file)
 
 class HandleQt(QWidget):
@@ -35,7 +36,8 @@ class HandleQt(QWidget):
         self.ui = QUiLoader().load('C:\\Skutest.ui')
         self.ui.setMinimumSize(600, 800)
         self.ui.setMaximumSize(600, 800)
-        self.ui.skuBox.addItems( ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143','H7180'])  # 下拉选择
+        self.ui.skuBox.addItems(
+            ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143','H7148', 'H7180'])  # 下拉选择
         self.ui.skuBox.setCurrentIndex(0)  # 默认第一个H7130
         self.ui.main_funBox.clicked.connect(self.main_home_func)  # 主要功能
         self.ui.wifi_Box.clicked.connect(self.wifi_Box)  # 配网
@@ -66,7 +68,6 @@ class HandleQt(QWidget):
         self.serial = self.ui.serialBox.currentText()  # 显示选择的串口
         print(self.serial)
         return self.serial
-
 
     """
        处理主功能逻辑和断言
@@ -109,36 +110,37 @@ class HandleQt(QWidget):
 
     # 复选配网
     def wifi_Box(self):
-            try:
-                self.ui.main_funBox.setEnabled(False)
-                self.ui.wifi_Box.setEnabled(False)
-                self.ser = serial.Serial(self.handle_serial(),
-                                         # self.ser = serial.Serial(com,
-                                         self.dbs,
-                                         timeout=self.timeout)
+        try:
+            self.ui.main_funBox.setEnabled(False)
+            self.ui.wifi_Box.setEnabled(False)
+            self.ser = serial.Serial(self.handle_serial(),
+                                     # self.ser = serial.Serial(com,
+                                     self.dbs,
+                                     timeout=self.timeout)
 
-                self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.handle_serial()))
+            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.handle_serial()))
 
-                # self.ui.serialBox.clear()
-            except Exception as e:
-                if self.ui.main_funBox.isChecked() is False:
-                    pass
-                else:
-                    self.ui.resultBrowser.append("<<<<<<<<<<<<串口被占用或未接串口>>>>>>>>>>>>")
-                # self.ui.serialBox.clear()
-            self.err = -1
-            if self.ui.wifi_Box.isChecked():
-                # self.ui.serialBox.clear()
-                self.ui.pushButton.clicked.connect(self.thread_start_wifi)
-                # self.app = HandlePage()  # 设备id，app包名，点击后延迟
-                self.ui.resultBrowser.append("*********选择配网压测*********")
+            # self.ui.serialBox.clear()
+        except Exception as e:
+            if self.ui.main_funBox.isChecked() is False:
+                pass
             else:
-                self.ui.serialBox.clear()
-                print("关闭串口")
-                self.ui.resultBrowser.append("*********关闭串口*********")
-                self.ui.pushButton.setEnabled(True)
-                self.ui.refreshSerial.setEnabled(True)
-                self.ser.close()
+                self.ui.resultBrowser.append("<<<<<<<<<<<<串口被占用或未接串口>>>>>>>>>>>>")
+            # self.ui.serialBox.clear()
+        self.err = -1
+        if self.ui.wifi_Box.isChecked():
+            # self.ui.serialBox.clear()
+            self.ui.pushButton.clicked.connect(self.thread_start_wifi)
+            # self.app = HandlePage()  # 设备id，app包名，点击后延迟
+            self.ui.resultBrowser.append("*********选择配网压测*********")
+        else:
+            self.ui.serialBox.clear()
+            print("关闭串口")
+            self.ui.resultBrowser.append("*********关闭串口*********")
+            self.ui.pushButton.setEnabled(True)
+            self.ui.refreshSerial.setEnabled(True)
+            self.ser.close()
+
     # 选择小家电sku主程序
     def thread_start_main(self):
         self.app = HandlePage()
@@ -186,6 +188,10 @@ class HandleQt(QWidget):
         elif self.sku == "H7143":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
             thread = threading.Thread(target=self.app.run_func_H7143, args=(self.sku,))
+            thread.start()
+        elif self.sku == "H7148":
+            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
+            thread = threading.Thread(target=self.app.run_func_H7148, args=(self.sku,))
             thread.start()
         elif self.sku == "H7180":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
@@ -339,7 +345,6 @@ class HandleQt(QWidget):
             self.read_thread.start()
         except Exception as e:
             print("无法启动线程:{}".format(e))
-
 
 # if __name__ == '__main__':
 #     sku_list = ['H7102', 'H7122', 'H7126', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143', 'H7161',
