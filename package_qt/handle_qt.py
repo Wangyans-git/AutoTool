@@ -13,12 +13,12 @@ from pathlib import Path
 
 import serial
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QMainWindow, QComboBox
 
 from logs.get_log import GetLog
 from package_config.common_config import ConFig
 from package_page.handle_page import HandlePage
-
+from package_page.handle_wifi import handle_wifi
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
 log_file = str(Path(ROOT) / "config")
@@ -26,24 +26,26 @@ log_file = str(Path(ROOT) / "config")
 
 # print(log_file)
 
-class HandleQt(QWidget):
+class HandleQt(QMainWindow):
     def __init__(self):
         super().__init__()
         self.dbs = 115200
         self.timeout = 1
         self.err = 0
+        self.serial_num = ''
         self.txt_date = ''  # 写入TXT的数据
         self.ui = QUiLoader().load('C:\\Skutest.ui')
         self.ui.setMinimumSize(600, 800)
         self.ui.setMaximumSize(600, 800)
         self.ui.skuBox.addItems(
-            ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143','H7148', 'H7180'])  # 下拉选择
+            ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143', 'H7148', 'H7180'])  # 下拉选择
         self.ui.skuBox.setCurrentIndex(0)  # 默认第一个H7130
         self.ui.main_funBox.clicked.connect(self.main_home_func)  # 主要功能
         self.ui.wifi_Box.clicked.connect(self.wifi_Box)  # 配网
         self.ui.stopButton.clicked.connect(self.quit)
         self.ui.refreshSerial.clicked.connect(self.handle_serial)
         self.ui.clearButton.clicked.connect(self.clear_browser)
+        self.sku_name = self.ui.sku_name.text()
         # 脚本日志
         if os.path.exists(r"C:\logs"):
             self.get_log = GetLog(r"C:\logs\串口断言结果.log")
@@ -60,14 +62,16 @@ class HandleQt(QWidget):
     def clear_browser(self) -> None:
         self.ui.resultBrowser.clear()
 
-    # 获取串口
     def handle_serial(self):
-        self.ui.serialBox.clear()
-        com = ConFig().serial_comlist()
-        self.ui.serialBox.addItems(com)  # 下拉选择
-        self.serial = self.ui.serialBox.currentText()  # 显示选择的串口
-        print(self.serial)
-        return self.serial
+        self.ui.serialBox.addItem("-选择串口-")
+        for i in ConFig().serial_comlist():
+            self.ui.serialBox.addItem(i)
+        self.ui.serialBox.activated[str].connect(self.onActivated)
+        self.ui.serialBox.setCurrentIndex(0)  # 默认选择为第一个选项（索引为 0）
+
+    def onActivated(self, serial_num):
+        print(f'选择了选项: {serial_num}')
+        self.serial_num = serial_num
 
     """
        处理主功能逻辑和断言
@@ -78,15 +82,16 @@ class HandleQt(QWidget):
         try:
             self.ui.main_funBox.setEnabled(False)
             self.ui.wifi_Box.setEnabled(False)
-            self.ser = serial.Serial(self.handle_serial(),
+
+            self.ser = serial.Serial(self.serial_num,
                                      # self.ser = serial.Serial(com,
                                      self.dbs,
                                      timeout=self.timeout)
 
-            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.handle_serial()))
-
+            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.serial_num))
             # self.ui.serialBox.clear()
         except Exception as e:
+            print(e)
             if self.ui.main_funBox.isChecked() is False:
                 pass
             else:
@@ -113,12 +118,12 @@ class HandleQt(QWidget):
         try:
             self.ui.main_funBox.setEnabled(False)
             self.ui.wifi_Box.setEnabled(False)
-            self.ser = serial.Serial(self.handle_serial(),
+            self.ser = serial.Serial(self.serial_num,
                                      # self.ser = serial.Serial(com,
                                      self.dbs,
                                      timeout=self.timeout)
 
-            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.handle_serial()))
+            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口{}成功>>>>>>>>>>>>".format(self.serial_num))
 
             # self.ui.serialBox.clear()
         except Exception as e:
@@ -210,7 +215,8 @@ class HandleQt(QWidget):
         self.start_wifi.start()
 
     def start_wifi(self):
-        self.app = HandlePage()
+        print("配网测试")
+        # handle_wifi.add_devise_devices(self.sku,self.sku_name)
 
     # 主功能主线程和获取数据
     def thread_recv_main(self):
@@ -274,7 +280,7 @@ class HandleQt(QWidget):
     # 添加温湿度计
     def add_temp_func(self):
         try:
-            self.ser = serial.Serial(self.handle_serial(),
+            self.ser = serial.Serial(self.serial_num,
                                      # self.ser = serial.Serial(com,
                                      self.dbs,
                                      timeout=self.timeout)

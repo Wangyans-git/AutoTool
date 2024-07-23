@@ -4,7 +4,6 @@
 # @Author  : 
 # @File    : 
 # @Description : 页面公共元素
-import datetime
 import os
 import time
 
@@ -127,6 +126,9 @@ class CommonPage:
             self.get_log.info("有彈窗")
         elif self.device(text='知道了').exists():
             self.device(text='知道了').click_exists(timeout=2)
+            self.get_log.info("有彈窗")
+        elif self.device(text='确认').exists():
+            self.device(text='确认').click_exists(timeout=2)
             self.get_log.info("有彈窗")
         else:
             pass
@@ -286,6 +288,7 @@ class CommonPage:
                 self.get_log.error("切换至自定义任务一后连接失败！")
         else:
             pass
+
     # 自动档
     def humi_auto(self):
         self.device(resourceId='com.govee.home:id/iv_auto_icon').click_exists(timeout=5)
@@ -438,7 +441,6 @@ class CommonPage:
             self.device(resourceId='com.govee.home:id/iv_dry_clothes_icon').click_exists(timeout=5.0)
         else:
             pass
-
 
     def kitchen_appliances(self):
         """
