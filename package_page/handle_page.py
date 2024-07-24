@@ -225,7 +225,7 @@ class HandlePage(CommonPage):
                 print("没有改找到该设备名的设备!")
             self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    def run_func_H710x(self, sku):
+    def run_func_H710x(self, sku,stop_flag):
         # print("测试H710x系列主功能")
         test_count = 0
         # 判断当前是否需要进入详情页
@@ -233,25 +233,27 @@ class HandlePage(CommonPage):
         if self.device(text=sku).exists(timeout=2):
             self.device(text=sku).click_exists(timeout=2)
             if self.enter_device(sku):
-                while True:
-                    try:
-                        self.handle_pop()
-                        # 判断设备是否是关机状态，如果是就先开机
-                        print(self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"])
-                        if self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"]:
-                            print("档位")
-                            self.Fan_gear()  # 切换档位
-                            self.dev_common()  # 通用功能
-                        else:
-                            self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
-                            self.get_log.error("设备关机过，重新开机测试..")
-                            print("设备关机过，重新开机测试..")
-                            self.Fan_gear()  # 切换档位
-                            self.dev_common()  # 通用功能
-                        test_count += 1
-                    except Exception as e:
-                        self.handle_pop()
-                        print(e)
+                while not stop_flag.is_set():
+                    self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
+                    time.sleep(1)
+                    # try:
+                    #     self.handle_pop()
+                    #     # 判断设备是否是关机状态，如果是就先开机
+                    #     print(self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"])
+                    #     if self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"]:
+                    #         print("档位")
+                    #         self.Fan_gear()  # 切换档位
+                    #         self.dev_common()  # 通用功能
+                    #     else:
+                    #         self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
+                    #         self.get_log.error("设备关机过，重新开机测试..")
+                    #         print("设备关机过，重新开机测试..")
+                    #         self.Fan_gear()  # 切换档位
+                    #         self.dev_common()  # 通用功能
+                    #     test_count += 1
+                    # except Exception as e:
+                    #     self.handle_pop()
+                    #     print(e)
             else:
                 while True:
                     self.device(text=sku).click_exists(timeout=5.0)
@@ -263,9 +265,9 @@ class HandlePage(CommonPage):
             print("没有改找到该设备名的设备!")
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    def run_func_H7102(self, sku):
+    def run_func_H7102(self, sku,stop_flag):
         print("测试H7102主功能")
-        self.run_func_H710x(sku)
+        self.run_func_H710x(sku,stop_flag)
 
     def run_func_wifi(self):
         self.app = HandlePage()

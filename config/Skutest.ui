@@ -173,7 +173,7 @@
                  </layout>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton">
+                 <widget class="QPushButton" name="startButton">
                   <property name="text">
                    <string>开始测试</string>
                   </property>
@@ -181,6 +181,13 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="stopButton">
+                  <property name="text">
+                   <string>暂停测试</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="quitButton">
                   <property name="text">
                    <string>退出</string>
                   </property>

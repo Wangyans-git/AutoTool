@@ -12,13 +12,15 @@ import time
 from pathlib import Path
 
 import serial
+from PyQt5.QtWidgets import QMainWindow
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QComboBox
 
 from logs.get_log import GetLog
 from package_config.common_config import ConFig
 from package_page.handle_page import HandlePage
-from package_page.handle_wifi import handle_wifi
+
+# from PySide2.QtUiTools import QUiLoader
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
 log_file = str(Path(ROOT) / "config")
@@ -34,6 +36,7 @@ class HandleQt(QMainWindow):
         self.err = 0
         self.serial_num = ''
         self.txt_date = ''  # 写入TXT的数据
+        self.stop_flag = threading.Event()  # 创建一个多线程事件对象
         self.ui = QUiLoader().load('C:\\Skutest.ui')
         self.ui.setMinimumSize(600, 800)
         self.ui.setMaximumSize(600, 800)
@@ -42,7 +45,8 @@ class HandleQt(QMainWindow):
         self.ui.skuBox.setCurrentIndex(0)  # 默认第一个H7130
         self.ui.main_funBox.clicked.connect(self.main_home_func)  # 主要功能
         self.ui.wifi_Box.clicked.connect(self.wifi_Box)  # 配网
-        self.ui.stopButton.clicked.connect(self.quit)
+        self.ui.quitButton.clicked.connect(self.quit)  # 退出程序
+        self.ui.stopButton.clicked.connect(self.stop)  # 暂停程序
         self.ui.refreshSerial.clicked.connect(self.handle_serial)
         self.ui.clearButton.clicked.connect(self.clear_browser)
         self.sku_name = self.ui.sku_name.text()
@@ -57,6 +61,10 @@ class HandleQt(QMainWindow):
     @staticmethod
     def quit():
         sys.exit()
+
+    def stop(self):
+        self.stop_flag.set()  # 设置事件，通知线程退出
+        print("程序停止")
 
     # 清除显示面板
     def clear_browser(self) -> None:
@@ -100,7 +108,8 @@ class HandleQt(QMainWindow):
         self.err = -1
         if self.ui.main_funBox.isChecked():
             # self.ui.serialBox.clear()
-            self.ui.pushButton.clicked.connect(self.thread_recv_main)
+
+            self.ui.startButton.clicked.connect(self.thread_recv_main)
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
             self.ui.resultBrowser.append("*********选择主功能压测*********")
         else:
@@ -109,7 +118,7 @@ class HandleQt(QMainWindow):
             self.ui.resultBrowser.append("*********关闭串口*********")
             self.ui.all_temp_Box.setEnabled(True)
             self.ui.wifi_Box.setEnabled(True)
-            self.ui.pushButton.setEnabled(True)
+            self.ui.startButton.setEnabled(True)
             self.ui.refreshSerial.setEnabled(True)
             self.ser.close()
 
@@ -135,14 +144,14 @@ class HandleQt(QMainWindow):
         self.err = -1
         if self.ui.wifi_Box.isChecked():
             # self.ui.serialBox.clear()
-            self.ui.pushButton.clicked.connect(self.thread_start_wifi)
+            self.ui.startButton.clicked.connect(self.thread_start_wifi)
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
             self.ui.resultBrowser.append("*********选择配网压测*********")
         else:
             self.ui.serialBox.clear()
             print("关闭串口")
             self.ui.resultBrowser.append("*********关闭串口*********")
-            self.ui.pushButton.setEnabled(True)
+            self.ui.startButton.setEnabled(True)
             self.ui.refreshSerial.setEnabled(True)
             self.ser.close()
 
@@ -152,7 +161,7 @@ class HandleQt(QMainWindow):
         self.sku = self.ui.skuBox.currentText()  # 显示选择的sku
         if self.sku == "H7102":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7102, args=(self.sku,))
+            thread = threading.Thread(target=self.app.run_func_H7102, args=(self.sku, self.stop_flag))
             thread.start()
         elif self.sku == "H7130":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
@@ -206,7 +215,7 @@ class HandleQt(QMainWindow):
 
     # 配网压测
     def thread_start_wifi(self):
-        self.ui.pushButton.setEnabled(False)
+        self.ui.startButton.setEnabled(False)
         self.ui.refreshSerial.setEnabled(False)
         self.ui.main_funBox.setEnabled(False)
         self.sku = self.ui.skuBox.currentText()  # 显示选择的sku
@@ -220,7 +229,8 @@ class HandleQt(QMainWindow):
 
     # 主功能主线程和获取数据
     def thread_recv_main(self):
-        self.ui.pushButton.setEnabled(False)
+        self.stop_flag.clear()
+        # self.ui.startButton.setEnabled(False)
         self.ui.refreshSerial.setEnabled(False)
         self.ui.main_funBox.setEnabled(False)
         try:
@@ -235,7 +245,7 @@ class HandleQt(QMainWindow):
         except Exception as e:
             print("启动app报错：", e)
             self.ui.resultBrowser.append("*********未连接手机*********")
-            self.ui.pushButton.setEnabled(True)
+            self.ui.startButton.setEnabled(True)
 
     # 处理断言数据
     def read_date_main(self):
@@ -291,7 +301,7 @@ class HandleQt(QMainWindow):
             self.ui.serialBox.clear()
         self.err = -1
         if self.ui.add_tempBox.isChecked():
-            self.ui.pushButton.clicked.connect(self.thread_add_temp)  # app iu启动配置
+            self.ui.startButton.clicked.connect(self.thread_add_temp)  # app iu启动配置
             self.ui.resultBrowser.append("*********选择添加温湿度计压测*********")
 
     def thread_add_temp(self):
@@ -302,7 +312,7 @@ class HandleQt(QMainWindow):
         except Exception as e:
             print("启动app报错：", e)
             self.ui.resultBrowser.append("*********未连接手机*********")
-            self.ui.pushButton.setEnabled(True)
+            self.ui.startButton.setEnabled(True)
         try:
             self.start_thread_main = threading.Thread(target=self.app.add_temp, args=(self.sku,))
             self.start_thread_main.daemon = 1
