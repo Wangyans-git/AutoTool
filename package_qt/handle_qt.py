@@ -41,7 +41,8 @@ class HandleQt(QMainWindow):
         self.ui.setMinimumSize(600, 800)
         self.ui.setMaximumSize(600, 800)
         self.ui.skuBox.addItems(
-            ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143', 'H7148', 'H7180'])  # 下拉选择
+            ['H7102', 'H7124', 'H7130', 'H7131', 'H7133', 'H7135', 'H713A', 'H713B', 'H713C', 'H7140', 'H7143', 'H7148',
+             'H7180'])  # 下拉选择
         self.ui.skuBox.setCurrentIndex(0)  # 默认第一个H7130
         self.ui.main_funBox.clicked.connect(self.main_home_func)  # 主要功能
         self.ui.wifi_Box.clicked.connect(self.wifi_Box)  # 配网
@@ -64,7 +65,9 @@ class HandleQt(QMainWindow):
 
     def stop(self):
         self.stop_flag.set()  # 设置事件，通知线程退出
-        print("程序停止")
+        self.ui.resultBrowser.append("*********程序暂停*********")
+        print("*********程序停止*********")
+        self.ui.startButton.setEnabled(True)
 
     # 清除显示面板
     def clear_browser(self) -> None:
@@ -167,29 +170,9 @@ class HandleQt(QMainWindow):
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
             thread = threading.Thread(target=self.app.run_func_H7130, args=(self.sku,))
             thread.start()
-        elif self.sku == "H7131":
+        elif self.sku[:4] in "H713X":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7131, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H7132":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7132, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H7133":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7133, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H7135":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7135, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H713B":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H713B, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H713C":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H713C, args=(self.sku,))
+            thread = threading.Thread(target=self.app.run_func_H713X, args=(self.sku, self.stop_flag))
             thread.start()
         elif self.sku == "H7124":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
@@ -230,7 +213,7 @@ class HandleQt(QMainWindow):
     # 主功能主线程和获取数据
     def thread_recv_main(self):
         self.stop_flag.clear()
-        # self.ui.startButton.setEnabled(False)
+        self.ui.startButton.setEnabled(False)
         self.ui.refreshSerial.setEnabled(False)
         self.ui.main_funBox.setEnabled(False)
         try:
@@ -238,9 +221,11 @@ class HandleQt(QMainWindow):
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
             self.start_thread_main = threading.Thread(target=self.thread_start_main)  # 开始测试主线程
             self.read_date_thread_main = threading.Thread(target=self.read_date_main)  # 开始断言主线程
-            self.read_date_thread_main.daemon = 1  # 守护线程，主线程退出，所有线程退出
             self.start_thread_main.daemon = 1
-            self.read_date_thread_main.start()
+            if self.ui.assertTextEdit.toPlainText().strip():
+                print("空数据")
+                self.read_date_thread_main.daemon = 1  # 守护线程，主线程退出，所有线程退出
+                self.read_date_thread_main.start()
             self.start_thread_main.start()
         except Exception as e:
             print("启动app报错：", e)
@@ -281,88 +266,3 @@ class HandleQt(QMainWindow):
             except Exception as e:
                 pass
 
-    """
-         处理绑定温湿度计/添加设备功能逻辑和断言
-    """
-
-    # 复选app绑定温湿度计
-
-    # 添加温湿度计
-    def add_temp_func(self):
-        try:
-            self.ser = serial.Serial(self.serial_num,
-                                     # self.ser = serial.Serial(com,
-                                     self.dbs,
-                                     timeout=self.timeout)
-            self.ui.resultBrowser.append("<<<<<<<<<<<<连接串口成功>>>>>>>>>>>>")
-            # self.ui.serialBox.clear()
-        except Exception as e:
-            self.ui.resultBrowser.append("<<<<<<<<<<<<串口被占用或未接串口>>>>>>>>>>>>")
-            self.ui.serialBox.clear()
-        self.err = -1
-        if self.ui.add_tempBox.isChecked():
-            self.ui.startButton.clicked.connect(self.thread_add_temp)  # app iu启动配置
-            self.ui.resultBrowser.append("*********选择添加温湿度计压测*********")
-
-    def thread_add_temp(self):
-        self.sku = self.ui.skuBox.currentText()  # 显示选择的sku
-        try:
-
-            self.app = HandlePage()  # 设备id，app包名，点击后延迟
-        except Exception as e:
-            print("启动app报错：", e)
-            self.ui.resultBrowser.append("*********未连接手机*********")
-            self.ui.startButton.setEnabled(True)
-        try:
-            self.start_thread_main = threading.Thread(target=self.app.add_temp, args=(self.sku,))
-            self.start_thread_main.daemon = 1
-            self.start_thread_main.start()
-        except Exception as e:
-            print("无法启动线程:{}".format(e))
-
-    # 断言
-    def read_date_device_temp(self):
-        self.ui.main_funBox.setEnabled(False)
-        self.ui.add_tempBox.setEnabled(False)
-        self.ui.resultBrowser.append("*********开始测试*********")
-        check_edit = self.ui.assertTextEdit.toPlainText().split(",")
-        check_dates = {}  # 断言数据
-        while True:
-            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S----->")
-            is_success_date = ''  # 判断是否执行成功的临时数据
-            try:
-                date_line = self.ser.readline().decode()
-                time.sleep(0.1)
-                is_success_date += date_line
-                self.txt_date += str(date_line)  # 所有写入到txt文档
-                self.write_txt(self.txt_date)
-                for i in range(len(check_edit)):
-                    # 开机:55 11 01 00 01 01 69, 关机:55 11 01 00 01 00 68
-                    check_dates[check_edit[i].split(":")[0]] = check_edit[i].split(":")[1]  # 将每个输入的键值对加入到字典里
-                    check_list = []
-                    for j in check_dates:
-                        check_list.append(j)
-                    if check_dates[check_list[i]] in date_line:
-                        # success_date = str(now_time + check_list[i]) + "."
-                        success_date = str(now_time + check_list[i])
-                        self.err_date += success_date
-                        self.txt_date += success_date
-                        self.ui.resultBrowser.append(success_date + "成功")
-            except Exception:
-                break
-
-    """
-    线程接收绑定温湿度计/添加设备功能数据
-    """
-
-    def thread_recv(self):
-        try:
-            self.read_thread = threading.Thread(target=self.read_date_device_temp)
-            self.read_thread.start()
-        except Exception as e:
-            print("无法启动线程:{}".format(e))
-
-# if __name__ == '__main__':
-#     sku_list = ['H7102', 'H7122', 'H7126', 'H7130', 'H7131', 'H7133', 'H7135', 'H7140', 'H7143', 'H7161',
-#                 'H7180']  # 下拉选择
-#     qt = HandleQt(115200, 1, sku_list)

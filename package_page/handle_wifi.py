@@ -9,14 +9,14 @@ import subprocess
 import threading
 import time
 from datetime import datetime
-from pathlib import Path
+from package_page.common_page import CommonPage
 
 import uiautomator2 as u2
 
 from logs import get_log
 
 
-class DistributionNetworkTest:
+class DistributionNetworkTest(CommonPage):
 
     def add_devise_devices(self, sku=None, sku_des=None):
         self.device = u2.connect()

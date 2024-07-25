@@ -112,26 +112,30 @@ class CommonPage:
     """
 
     def handle_pop(self):
-        if self.device(resourceId='com.govee.home:id/btn_cancel').exists():
-            self.device(resourceId='com.govee.home:id/btn_cancel').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        elif self.device(resourceId='com.govee.home:id/dialog_done').exists():
-            self.device(resourceId='com.govee.home:id/dialog_done').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        elif self.device(resourceId='com.govee.home:id/btn_done').exists():
-            self.device(resourceId='com.govee.home:id/btn_done').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        elif self.device(resourceId='com.govee.home:id/btn_got_it').exists():
-            self.device(resourceId='com.govee.home:id/btn_got_it').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        elif self.device(text='知道了').exists():
-            self.device(text='知道了').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        elif self.device(text='确认').exists():
-            self.device(text='确认').click_exists(timeout=2)
-            self.get_log.info("有彈窗")
-        else:
-            pass
+        while True:
+            print("弹窗")
+            if self.device(resourceId='com.govee.home:id/btn_cancel').exists():
+                self.device(resourceId='com.govee.home:id/btn_cancel').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(resourceId='com.govee.home:id/dialog_done').exists():
+                self.device(resourceId='com.govee.home:id/dialog_done').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(resourceId='com.govee.home:id/btn_done').exists():
+                self.device(resourceId='com.govee.home:id/btn_done').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(resourceId='com.govee.home:id/btn_got_it').exists():
+                self.device(resourceId='com.govee.home:id/btn_got_it').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(text='知道了').exists():
+                self.device(text='知道了').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(text='确认').exists():
+                self.device(text='确认').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            elif self.device(text='复制到粘贴板').exists():
+                self.device(text='复制到粘贴板').click_exists(timeout=2)
+                self.get_log.info("有彈窗")
+            time.sleep(5)
 
     # 下滑
     def down(self):
@@ -150,7 +154,7 @@ class CommonPage:
     # 摇头、夜灯、锁、显示
     def dev_common(self):
         self.down()
-        self.handle_pop()
+        
         # 摇头
         if self.device(resourceId='com.govee.home:id/iv_shake_switch').exists():
             print("有摇头")
@@ -194,7 +198,7 @@ class CommonPage:
             else:
                 self.get_log.error("开启关闭显示后连接失败！")
         self.up()
-        self.handle_pop()
+        
 
     def timer(self):
         # 预约定时
@@ -213,7 +217,7 @@ class CommonPage:
             self.device(resourceId='com.govee.home:id/tv_delay_off_title').click_exists(timeout=2)
             for i in range(2):
                 self.device(resourceId='com.govee.home:id/ivForbid').click_exists(timeout=2)
-            self.handle_pop()
+            
             if self.check_connect():
                 self.get_log.info("设置倒计时关机成功！")
             else:
@@ -246,7 +250,7 @@ class CommonPage:
         self.device.click(0.73, 0.812)  # 7档
 
         self.device.click(0.827, 0.812)  # 8档
-        self.handle_pop()
+        
         time.sleep(2)
         if self.check_connect():
             self.get_log.info("切换至1-8挡成功！")
@@ -257,7 +261,7 @@ class CommonPage:
     def humi_diy(self):
         if self.device(resourceId='com.govee.home:id/iv_custom_icon').exists():
             self.device(resourceId='com.govee.home:id/iv_custom_icon').click_exists(timeout=5)
-            self.handle_pop()
+            
             if self.check_connect():
                 self.get_log.info("切换至自定义模式成功！")
             else:
@@ -265,7 +269,7 @@ class CommonPage:
             self.device.xpath(
                 '//*[@resource-id="com.govee.home:id/custom_item_2"]/android.widget.ImageView[4]').click_exists(
                 timeout=5)
-            self.handle_pop()
+            
             if self.check_connect():
                 self.get_log.info("切换至自定义任务二成功！")
             else:
@@ -273,7 +277,7 @@ class CommonPage:
             self.device.xpath(
                 '//*[@resource-id="com.govee.home:id/custom_item_3"]/android.widget.ImageView[3]').click_exists(
                 timeout=5)
-            self.handle_pop()
+            
             if self.check_connect():
                 self.get_log.info("切换至自定义任务三成功！")
             else:
@@ -281,7 +285,7 @@ class CommonPage:
             self.device.xpath(
                 '//*[@resource-id="com.govee.home:id/custom_item_1"]/android.widget.ImageView[5]').click_exists(
                 timeout=5)
-            self.handle_pop()
+            
             if self.check_connect():
                 self.get_log.info("切换至自定义任务一成功！")
             else:
@@ -293,7 +297,7 @@ class CommonPage:
     def humi_auto(self):
         self.device(resourceId='com.govee.home:id/iv_auto_icon').click_exists(timeout=5)
         # 如果有确认弹窗，点击取消
-        self.handle_pop()
+        
         if self.check_connect():
             self.get_log.info("切换至自动模式成功！")
             print("切换至自动模式成功")
@@ -330,12 +334,12 @@ class CommonPage:
             for i in range(2):
                 self.device(resourceId='com.govee.home:id/iv_auto_stop_switch').click_exists(
                     timeout=5.0)  # 自动停止按钮
-        self.handle_pop()
+        
         if self.device(resourceId='com.govee.home:id/ivAutoStopSwitch').exists():
             for i in range(2):
                 self.device(resourceId='com.govee.home:id/ivAutoStopSwitch').click_exists(
                     timeout=5.0)  # 自动停止按钮
-        self.handle_pop()
+        
         if self.check_connect():
             self.get_log.info("切换至自动挡位成功！")
         else:
@@ -362,7 +366,7 @@ class CommonPage:
         else:
             self.get_log.error("切换至自然风挡位失败！")
         self.device(resourceId='com.govee.home:id/iv_custom_icon').click_exists(timeout=5.0)  # 自定义
-        self.handle_pop()
+        
         if self.check_connect():
             self.get_log.info("切换至自定义挡位成功！")
         else:
@@ -391,7 +395,7 @@ class CommonPage:
             print("切换至低档挡位成功！")
         else:
             self.get_log.error("切换至低挡后连接失败！")
-        self.handle_pop()
+        
         self.device.xpath('//*[@text="中档"]').click_exists(
             timeout=5.0)
         if self.check_connect():
@@ -399,7 +403,7 @@ class CommonPage:
             print("切换至中档挡位成功！")
         else:
             self.get_log.error("切换至中挡后连接失败！")
-        self.handle_pop()
+        
         self.device.xpath('//*[@text="高档"]').click_exists(
             timeout=5.0)
         if self.check_connect():
@@ -407,7 +411,7 @@ class CommonPage:
             print("切换至高档挡位成功！")
         else:
             self.get_log.error("切换至高挡后连接失败！")
-        self.handle_pop()
+        
         self.device.xpath('//*[@text="睡眠"]').click_exists(
             timeout=5.0)  # 手动挡
         if self.check_connect():
@@ -415,7 +419,7 @@ class CommonPage:
             print("切换至睡眠挡位成功！")
         else:
             self.get_log.error("切换至睡眠挡后连接失败！")
-        self.handle_pop()
+        
         self.device.xpath('//*[@text="自动"]').click_exists(
             timeout=5.0)  # 手动挡
         if self.check_connect():
