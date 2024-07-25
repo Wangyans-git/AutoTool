@@ -6,7 +6,6 @@
 # @Description : 页面公共元素
 import os
 import time
-
 import uiautomator2 as u2
 
 from logs.get_log import GetLog
@@ -18,7 +17,7 @@ class CommonPage:
     def __init__(self):
         self.device = u2.connect_usb()
         self.device.app_start('com.govee.home')
-        self.device.settings['wait_timeout'] = 10  # 元素等待时间30s
+        self.device.settings['wait_timeout'] = 30  # 元素等待时间30s
         self.device.settings['operation_delay'] = 0.1  # 每次点击后等待1s
         # 脚本日志
         if os.path.exists("C:\\logs"):

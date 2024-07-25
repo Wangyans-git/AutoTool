@@ -6,7 +6,6 @@
 # @Description : app页面定位操作
 import threading
 import time
-
 import serial
 
 from package_page.common_page import CommonPage
@@ -62,10 +61,6 @@ class HandlePage(CommonPage):
                     time.sleep(5)
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    def run_func_H7124(self, sku, stop_flag):
-        print("测试H7124主功能")
-        self.run_func_H712X(sku, stop_flag)
-
     """测试H713系列主功能"""
 
     # sku压测时使用，不被走查代码调用
@@ -109,18 +104,10 @@ class HandlePage(CommonPage):
         print("测试H7130主功能")
 
     # 测试H7140主功能
-    def run_func_H7140(self, sku, stop_flag):
-        print("测试H7140")
-        self.run_func_H714X(sku, stop_flag)
-
-    def run_func_H7148(self, sku, stop_flag):
-        print("测试H7148")
-        self.run_func_H714X(sku, stop_flag)
-
     def run_func_H714X(self, sku, stop_flag):
+        print(f"测试{sku}主功能")
         # 判断当前是否需要进入详情页te
         test_count = 0
-
         if self.device(text=sku).exists(timeout=5):
             self.device(text=sku).click_exists(timeout=2)
         if self.enter_device(sku):
@@ -151,11 +138,6 @@ class HandlePage(CommonPage):
                     time.sleep(5)
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    # 测试H7143主功能
-    def run_func_H7143(self, sku, stop_flag):
-        print("测试H7143主功能")
-        self.run_func_H714X(sku, stop_flag)
-
     # 测试H7180主功能
     def run_func_H7180(self, sku, stop_flag):
         print("测试H7180主功能")
@@ -185,8 +167,8 @@ class HandlePage(CommonPage):
                     time.sleep(5)
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    def run_func_H710x(self, sku, stop_flag):
-        # print("测试H710x系列主功能")
+    def run_func_H710X(self, sku, stop_flag):
+        print(f"测试{sku}系列主功能")
         test_count = 0
         # 判断当前是否需要进入详情页
         if self.device(text=sku).exists(timeout=2):
@@ -220,10 +202,3 @@ class HandlePage(CommonPage):
                     time.sleep(5)
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
-    def run_func_H7102(self, sku, stop_flag):
-        print("测试H7102主功能")
-        self.run_func_H710x(sku, stop_flag)
-
-    def run_func_wifi(self):
-        self.app = HandlePage()
-        print("配网中...")

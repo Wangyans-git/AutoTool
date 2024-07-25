@@ -4,28 +4,30 @@
 # @Author  :yansheng.wang 
 # @File    : 
 # @Description : 配网压测
-
+import os
 import subprocess
 import threading
 import time
 from datetime import datetime
-from package_page.common_page import CommonPage
 
 import uiautomator2 as u2
 
-from logs import get_log
+from logs.get_log import GetLog
 
 
-class DistributionNetworkTest(CommonPage):
+class DistributionNetworkTest:
 
-    def add_devise_devices(self, sku=None, sku_des=None):
+    def add_devise_devices(self, stop_flag, sku=None, sku_des=None):
         self.device = u2.connect()
-
         self.device.app_start('com.govee.home')
         self.device.implicitly_wait(30)  # 元素等待时间30s
         # self.device.settings['operation_delay'] = (1, 1)  # 每次点击后等待2s
         # 脚本日志
-        self.get_log = get_log.GetLog("c:\\log")
+        if os.path.exists("C:\\logs"):
+            self.get_log = GetLog(r"C:\logs\\app配网测试数据.log")
+        else:
+            os.mkdir("C:\\logs")
+            self.get_log = GetLog(r"C:\logs\\app配网测试数据.log")
         # 获取手机分辨率
         self.width, self.height = self.device.window_size()
         self.sku = sku
@@ -38,7 +40,7 @@ class DistributionNetworkTest(CommonPage):
         add_device_num = 0
         add_success_num = 0
         add_fail_num = 0
-        while True:
+        while not stop_flag.is_set():
             try:
                 """添加设备"""
                 # 添加”+“
@@ -54,12 +56,16 @@ class DistributionNetworkTest(CommonPage):
                         time.sleep(2)
                         if self.device(text="继续").exists():
                             self.device(text="继续").click_exists(timeout=10)
+                        if self.device(text="已开启，继续").exists():
+                            self.device(text="已开启，继续").click_exists(timeout=10)
                         if self.device(text=self.sku_des).exists(timeout=10):
+                            print(self.sku_des)
                             break
                         else:
                             self.device(text='重新扫描').click_exists(timeout=10)
                     # 选择设备  H5086_681B   H5086_67c9
                     while True:
+
                         self.device(text=self.sku_des).click_exists(timeout=5)
                         time.sleep(1)
                         if self.device(text='配对').exists():
@@ -249,4 +255,4 @@ class DistributionNetworkTest(CommonPage):
             print("文件读写出错：", e)
 
 
-handle_wifi = DistributionNetworkTest  # com为串口日志，com1为继电器
+handle_wifi = DistributionNetworkTest()  # com为串口日志，com1为继电器

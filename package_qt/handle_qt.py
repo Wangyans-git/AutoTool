@@ -9,17 +9,16 @@ import os
 import sys
 import threading
 import time
-from pathlib import Path
-
 import serial
+
 from PyQt5.QtWidgets import QMainWindow
 from PySide2.QtUiTools import QUiLoader
-
+from pathlib import Path
 from logs.get_log import GetLog
 from package_config.common_config import ConFig
 from package_page.handle_page import HandlePage
+from package_page.handle_wifi import handle_wifi
 
-# from PySide2.QtUiTools import QUiLoader
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
@@ -45,12 +44,12 @@ class HandleQt(QMainWindow):
              'H7180'])  # 下拉选择
         self.ui.skuBox.setCurrentIndex(0)  # 默认第一个H7130
         self.ui.main_funBox.clicked.connect(self.main_home_func)  # 主要功能
-        self.ui.wifi_Box.clicked.connect(self.wifi_Box)  # 配网
+        self.ui.wifi_Box.clicked.connect(self.wifi_fun)  # 配网
         self.ui.quitButton.clicked.connect(self.quit)  # 退出程序
         self.ui.stopButton.clicked.connect(self.stop)  # 暂停程序
         self.ui.refreshSerial.clicked.connect(self.handle_serial)
         self.ui.clearButton.clicked.connect(self.clear_browser)
-        self.sku_name = self.ui.sku_name.text()
+
         # 脚本日志
         if os.path.exists(r"C:\logs"):
             self.get_log = GetLog(r"C:\logs\串口断言结果.log")
@@ -91,9 +90,6 @@ class HandleQt(QMainWindow):
     # 复选主功能
     def main_home_func(self):
         try:
-            self.ui.main_funBox.setEnabled(False)
-            self.ui.wifi_Box.setEnabled(False)
-
             self.ser = serial.Serial(self.serial_num,
                                      # self.ser = serial.Serial(com,
                                      self.dbs,
@@ -110,8 +106,8 @@ class HandleQt(QMainWindow):
             # self.ui.serialBox.clear()
         self.err = -1
         if self.ui.main_funBox.isChecked():
+            self.ui.wifi_Box.setChecked(False)
             # self.ui.serialBox.clear()
-
             self.ui.startButton.clicked.connect(self.thread_recv_main)
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
             self.ui.resultBrowser.append("*********选择主功能压测*********")
@@ -126,10 +122,8 @@ class HandleQt(QMainWindow):
             self.ser.close()
 
     # 复选配网
-    def wifi_Box(self):
+    def wifi_fun(self):
         try:
-            self.ui.main_funBox.setEnabled(False)
-            self.ui.wifi_Box.setEnabled(False)
             self.ser = serial.Serial(self.serial_num,
                                      # self.ser = serial.Serial(com,
                                      self.dbs,
@@ -146,6 +140,7 @@ class HandleQt(QMainWindow):
             # self.ui.serialBox.clear()
         self.err = -1
         if self.ui.wifi_Box.isChecked():
+            self.ui.main_funBox.setChecked(False)
             # self.ui.serialBox.clear()
             self.ui.startButton.clicked.connect(self.thread_start_wifi)
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
@@ -162,9 +157,9 @@ class HandleQt(QMainWindow):
     def thread_start_main(self):
         self.app = HandlePage()
         self.sku = self.ui.skuBox.currentText()  # 显示选择的sku
-        if self.sku == "H7102":
+        if self.sku[:4] in "H710X":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7102, args=(self.sku, self.stop_flag))
+            thread = threading.Thread(target=self.app.run_func_H710X, args=(self.sku, self.stop_flag))
             thread.start()
         elif self.sku == "H7130":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
@@ -174,21 +169,13 @@ class HandleQt(QMainWindow):
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
             thread = threading.Thread(target=self.app.run_func_H713X, args=(self.sku, self.stop_flag))
             thread.start()
-        elif self.sku == "H7124":
+        elif self.sku[:4] in "H712X":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7124, args=(self.sku,))
+            thread = threading.Thread(target=self.app.run_func_H712X, args=(self.sku, self.stop_flag))
             thread.start()
-        elif self.sku == "H7140":
+        elif self.sku[:4] in "H714X":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7140, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H7143":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7143, args=(self.sku,))
-            thread.start()
-        elif self.sku == "H7148":
-            self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
-            thread = threading.Thread(target=self.app.run_func_H7148, args=(self.sku,))
+            thread = threading.Thread(target=self.app.run_func_H714X, args=(self.sku, self.stop_flag))
             thread.start()
         elif self.sku == "H7180":
             self.ui.resultBrowser.append("*********开始测试{}*********".format(self.sku))
@@ -201,14 +188,16 @@ class HandleQt(QMainWindow):
         self.ui.startButton.setEnabled(False)
         self.ui.refreshSerial.setEnabled(False)
         self.ui.main_funBox.setEnabled(False)
+        self.ui.wifi_Box.setEnabled(False)
         self.sku = self.ui.skuBox.currentText()  # 显示选择的sku
         self.start_wifi = threading.Thread(target=self.start_wifi)
         self.start_wifi.daemon = 1
         self.start_wifi.start()
 
     def start_wifi(self):
+        self.sku_name = f"{self.sku}_"+self.ui.sku_name.text()
         print("配网测试")
-        # handle_wifi.add_devise_devices(self.sku,self.sku_name)
+        handle_wifi.add_devise_devices(self.stop_flag,self.sku,self.sku_name)
 
     # 主功能主线程和获取数据
     def thread_recv_main(self):
@@ -216,8 +205,8 @@ class HandleQt(QMainWindow):
         self.ui.startButton.setEnabled(False)
         self.ui.refreshSerial.setEnabled(False)
         self.ui.main_funBox.setEnabled(False)
+        self.ui.wifi_Box.setEnabled(False)
         try:
-
             # self.app = HandlePage()  # 设备id，app包名，点击后延迟
             self.start_thread_main = threading.Thread(target=self.thread_start_main)  # 开始测试主线程
             self.read_date_thread_main = threading.Thread(target=self.read_date_main)  # 开始断言主线程
@@ -265,4 +254,3 @@ class HandleQt(QMainWindow):
                         self.get_log.info(success_date)
             except Exception as e:
                 pass
-

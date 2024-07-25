@@ -85,9 +85,9 @@
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,0,1,0,0">
+          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,1,0,0">
            <item>
-            <widget class="QCheckBox" name="main_funBox">
+            <widget class="QRadioButton" name="main_funBox">
              <property name="text">
               <string>单设备主功能压测(模式/档位)</string>
              </property>
@@ -107,7 +107,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QCheckBox" name="wifi_Box">
+            <widget class="QRadioButton" name="wifi_Box">
              <property name="text">
               <string>小家电配网压测</string>
              </property>
@@ -129,14 +129,14 @@
            <item>
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>输入设备名称</string>
+              <string>输入配网设备名称</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLineEdit" name="sku_name">
              <property name="placeholderText">
-              <string>H7131_XXXX</string>
+              <string>H7131_XXXX（后四位即可）</string>
              </property>
             </widget>
            </item>
