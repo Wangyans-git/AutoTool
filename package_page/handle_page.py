@@ -21,8 +21,8 @@ class HandlePage(CommonPage):
         except Exception as e:
             print("Hnadlepage没有可用串口了", e)
 
-    def handle_pop_thread(self):
-        t = threading.Thread(target=self.handle_pop)
+    def handle_pop_thread(self,stop_flag):
+        t = threading.Thread(target=self.handle_pop,args=(stop_flag,))
         t.start()
 
     """测试H7122主动能"""
@@ -65,39 +65,40 @@ class HandlePage(CommonPage):
 
     # sku压测时使用，不被走查代码调用
     def run_func_H713X(self, sku, stop_flag):
-        print(F"测试{sku}主功能")
-        self.handle_pop_thread()
-        test_count = 0
-        # 判断当前是否需要进入详情页
-        if self.device(text=sku).exists(timeout=2):
-            self.device(text=sku).click_exists(timeout=2)
-        if self.enter_device(sku):
-            while not stop_flag.is_set():
-                try:
+        if not stop_flag.is_set():
+            print(F"测试{sku}主功能")
+            self.handle_pop_thread(stop_flag)
+            test_count = 0
+            # 判断当前是否需要进入详情页
+            if self.device(text=sku).exists(timeout=2):
+                self.device(text=sku).click_exists(timeout=2)
+            if self.enter_device(sku):
+                while not stop_flag.is_set():
+                    try:
 
-                    # 判断设备是否是关机状态，如果是就先开机
-                    if self.device(resourceId='com.govee.home:id/iv_timer_protected').exists():
-                        self.Heater_gear()  # 切换档位
-                        self.dev_common()  # 通用功能
-                        # self.dev_setting()  # 设置页
+                        # 判断设备是否是关机状态，如果是就先开机
+                        if self.device(resourceId='com.govee.home:id/iv_timer_protected').exists():
+                            self.Heater_gear()  # 切换档位
+                            self.dev_common()  # 通用功能
+                            # self.dev_setting()  # 设置页
+                        else:
+                            self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
+                            self.get_log.error("设备关机过，重新开机测试..")
+                            print("设备关机过，重新开机测试..")
+                            self.Heater_gear()  # 切换档位
+                            self.dev_common()  # 通用功能
+                            # self.dev_setting()  # 设置页
+                        test_count += 1
+                    except Exception as e:
+                        print(e)
+            else:
+                while True:
+                    self.device(text=sku).click_exists(timeout=5.0)
+                    if self.enter_device():
+                        break
                     else:
-                        self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
-                        self.get_log.error("设备关机过，重新开机测试..")
-                        print("设备关机过，重新开机测试..")
-                        self.Heater_gear()  # 切换档位
-                        self.dev_common()  # 通用功能
-                        # self.dev_setting()  # 设置页
-                    test_count += 1
-                except Exception as e:
-                    print(e)
-        else:
-            while True:
-                self.device(text=sku).click_exists(timeout=5.0)
-                if self.enter_device():
-                    break
-                else:
-                    time.sleep(5)
-        self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
+                        time.sleep(5)
+            self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
     # 测试H7130主功能
     def run_func_H7130(self, sku, stop_flag):
@@ -168,37 +169,38 @@ class HandlePage(CommonPage):
         self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 
     def run_func_H710X(self, sku, stop_flag):
-        print(f"测试{sku}系列主功能")
-        test_count = 0
-        # 判断当前是否需要进入详情页
-        if self.device(text=sku).exists(timeout=2):
-            self.device(text=sku).click_exists(timeout=2)
-        if self.enter_device(sku):
-            while not stop_flag.is_set():
-                try:
+        if not stop_flag.is_set():
+            print(f"测试{sku}系列主功能")
+            test_count = 0
+            # 判断当前是否需要进入详情页
+            if self.device(text=sku).exists(timeout=2):
+                self.device(text=sku).click_exists(timeout=2)
+            if self.enter_device(sku):
+                while not stop_flag.is_set():
+                    try:
 
-                    # 判断设备是否是关机状态，如果是就先开机
-                    print(self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"])
-                    if self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"]:
-                        print("档位")
-                        self.Fan_gear()  # 切换档位
-                        self.dev_common()  # 通用功能
+                        # 判断设备是否是关机状态，如果是就先开机
+                        print(self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"])
+                        if self.device(resourceId='com.govee.home:id/gear_operate_seek_bar').info["enabled"]:
+                            print("档位")
+                            self.Fan_gear()  # 切换档位
+                            self.dev_common()  # 通用功能
+                        else:
+                            self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
+                            self.get_log.error("设备关机过，重新开机测试..")
+                            print("设备关机过，重新开机测试..")
+                            self.Fan_gear()  # 切换档位
+                            self.dev_common()  # 通用功能
+                        test_count += 1
+                    except Exception as e:
+
+                        print(e)
+            else:
+                while True:
+                    self.device(text=sku).click_exists(timeout=5.0)
+                    if self.enter_device():
+                        break
                     else:
-                        self.device(resourceId='com.govee.home:id/iv_switch').click_exists(timeout=5.0)
-                        self.get_log.error("设备关机过，重新开机测试..")
-                        print("设备关机过，重新开机测试..")
-                        self.Fan_gear()  # 切换档位
-                        self.dev_common()  # 通用功能
-                    test_count += 1
-                except Exception as e:
-
-                    print(e)
-        else:
-            while True:
-                self.device(text=sku).click_exists(timeout=5.0)
-                if self.enter_device():
-                    break
-                else:
-                    time.sleep(5)
-        self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
+                        time.sleep(5)
+            self.get_log.info("{0}已测试了测试{1}次。".format(sku, test_count))
 

@@ -35,124 +35,125 @@ class DistributionNetworkTest:
         self.in_page_num = 0
         self.network_success_num = 0
 
-        self.thread_watch()  # 处理弹窗
+        self.thread_watch(stop_flag)  # 处理弹窗
         # self.thread_wifi_success_or_fail()  # 串口判断配网是否成功
         add_device_num = 0
         add_success_num = 0
         add_fail_num = 0
-        while not stop_flag.is_set():
-            try:
-                """添加设备"""
-                # 添加”+“
-                if self.device(resourceId="com.govee.home:id/ivDevAdd").exists(timeout=10):
-                    self.device(resourceId="com.govee.home:id/ivDevAdd").click_exists(timeout=10)
-                    # 输入要添加的SKU
-                    self.device(resourceId="com.govee.home:id/tv_search").click_exists(timeout=10)
-                    self.device(resourceId="com.govee.home:id/et_search").send_keys(self.sku)
-                    # 点击SKU
-                    time.sleep(5)
-                    while True:
-                        self.device(resourceId="com.govee.home:id/sku_des").click_exists(timeout=30)
-                        time.sleep(2)
-                        if self.device(text="继续").exists():
-                            self.device(text="继续").click_exists(timeout=10)
-                        if self.device(text="已开启，继续").exists():
-                            self.device(text="已开启，继续").click_exists(timeout=10)
-                        if self.device(text=self.sku_des).exists(timeout=10):
-                            print(self.sku_des)
-                            break
-                        else:
-                            self.device(text='重新扫描').click_exists(timeout=10)
-                    # 选择设备  H5086_681B   H5086_67c9
-                    while True:
-
-                        self.device(text=self.sku_des).click_exists(timeout=5)
-                        time.sleep(1)
-                        if self.device(text='配对').exists():
-                            break
-                        else:
-                            if self.device(text="重新连接").exists():
-                                self.device(text="重新连接").click_exists(timeout=5)
-                            if self.device(resourceId='com.govee.home:id/done').exists():
-                                break
-                            print("sku点不到了")
-                # 命名设备
-                print("点击配对")
-
-                # 继电器模拟点击配对
-                if self.device(text='配对').exists(timeout=30):
-                    time.sleep(2)
-                    # try:
-                    #     self.relay_ser.write(bytes.fromhex('A0 01 01 A2'))
-                    #     time.sleep(0.5)
-                    #     self.relay_ser.write(bytes.fromhex('A0 01 00 A1'))
-                    # except Exception as e:
-                    #     print("继电器串口错误：", e)
-
-                if self.device(resourceId='com.govee.home:id/done').exists(timeout=30):
-                    add_device_num += 1
-                    print("配对次数：", add_device_num)
-                    self.get_log.info("配对次数：{}".format(add_device_num))
-                    self.old_time = datetime.now()
-                else:
-                    print("配对时出错")
-                    self.error_handle()
-                if self.device(resourceId='com.govee.home:id/done').exists(timeout=30):
-                    while True:
-                        self.device(resourceId="com.govee.home:id/sensor_name_edit").click_exists(timeout=10)
-                        self.device(resourceId="com.govee.home:id/sensor_name_edit").send_keys(self.sku)
-                        self.device(resourceId="com.govee.home:id/done").click_exists(timeout=10)
-                        if self.device(text='保存密码').exists(timeout=10):
-                            break
-                # wifi配置
-                if self.device(text='ASUS_F0_2G').exists(timeout=5):
-                    self.device(resourceId="com.govee.home:id/et_pwd").clear_text()
-                    self.device(resourceId="com.govee.home:id/et_pwd").send_keys("govee123")
-                    while True:
-                        print("配网")
-                        self.device(resourceId="com.govee.home:id/send_wifi").click_exists(timeout=10)
-                        if self.device(resourceId="com.govee.home:id/iv_switch").exists(timeout=60):
-                            break
-                        elif self.device(resourceId="com.govee.home:id/btnSwitch").exists(timeout=60):
-                            break
-                        else:
-                            print("配网时出错")
-                            self.error_handle()
-                else:
-                    # 跳过配网
-                    while True:
-                        print("跳过")
-                        if self.device(resourceId='com.govee.home:id/skip').exists(timeout=10):
-                            self.device(resourceId='com.govee.home:id/skip').click_exists(timeout=10)
-                            if self.device(resourceId="com.govee.home:id/btn_done").exists(timeout=10):
-                                self.device(resourceId="com.govee.home:id/btn_done").click_exists(timeout=10)
-                            if self.device(resourceId="com.govee.home:id/iv_switch").exists(timeout=30):
+        if not stop_flag.is_set():
+            while not stop_flag.is_set():
+                try:
+                    """添加设备"""
+                    # 添加”+“
+                    if self.device(resourceId="com.govee.home:id/ivDevAdd").exists(timeout=10):
+                        self.device(resourceId="com.govee.home:id/ivDevAdd").click_exists(timeout=10)
+                        # 输入要添加的SKU
+                        self.device(resourceId="com.govee.home:id/tv_search").click_exists(timeout=10)
+                        self.device(resourceId="com.govee.home:id/et_search").send_keys(self.sku)
+                        # 点击SKU
+                        time.sleep(5)
+                        while True:
+                            self.device(resourceId="com.govee.home:id/sku_des").click_exists(timeout=30)
+                            time.sleep(2)
+                            if self.device(text="继续").exists():
+                                self.device(text="继续").click_exists(timeout=10)
+                            if self.device(text="已开启，继续").exists():
+                                self.device(text="已开启，继续").click_exists(timeout=10)
+                            if self.device(text=self.sku_des).exists(timeout=10):
+                                print(self.sku_des)
                                 break
                             else:
-                                print("跳过时出错")
+                                self.device(text='重新扫描').click_exists(timeout=10)
+                        # 选择设备  H5086_681B   H5086_67c9
+                        while True:
+
+                            self.device(text=self.sku_des).click_exists(timeout=5)
+                            time.sleep(1)
+                            if self.device(text='配对').exists():
+                                break
+                            else:
+                                if self.device(text="重新连接").exists():
+                                    self.device(text="重新连接").click_exists(timeout=5)
+                                if self.device(resourceId='com.govee.home:id/done').exists():
+                                    break
+                                print("sku点不到了")
+                    # 命名设备
+                    print("点击配对")
+
+                    # 继电器模拟点击配对
+                    if self.device(text='配对').exists(timeout=30):
+                        time.sleep(2)
+                        # try:
+                        #     self.relay_ser.write(bytes.fromhex('A0 01 01 A2'))
+                        #     time.sleep(0.5)
+                        #     self.relay_ser.write(bytes.fromhex('A0 01 00 A1'))
+                        # except Exception as e:
+                        #     print("继电器串口错误：", e)
+
+                    if self.device(resourceId='com.govee.home:id/done').exists(timeout=30):
+                        add_device_num += 1
+                        print("配对次数：", add_device_num)
+                        self.get_log.info("配对次数：{}".format(add_device_num))
+                        self.old_time = datetime.now()
+                    else:
+                        print("配对时出错")
+                        self.error_handle()
+                    if self.device(resourceId='com.govee.home:id/done').exists(timeout=30):
+                        while True:
+                            self.device(resourceId="com.govee.home:id/sensor_name_edit").click_exists(timeout=10)
+                            self.device(resourceId="com.govee.home:id/sensor_name_edit").send_keys(self.sku)
+                            self.device(resourceId="com.govee.home:id/done").click_exists(timeout=10)
+                            if self.device(text='保存密码').exists(timeout=10):
+                                break
+                    # wifi配置
+                    if self.device(text='ASUS_F0_2G').exists(timeout=5):
+                        self.device(resourceId="com.govee.home:id/et_pwd").clear_text()
+                        self.device(resourceId="com.govee.home:id/et_pwd").send_keys("govee123")
+                        while True:
+                            print("配网")
+                            self.device(resourceId="com.govee.home:id/send_wifi").click_exists(timeout=10)
+                            if self.device(resourceId="com.govee.home:id/iv_switch").exists(timeout=60):
+                                break
+                            elif self.device(resourceId="com.govee.home:id/btnSwitch").exists(timeout=60):
+                                break
+                            else:
+                                print("配网时出错")
                                 self.error_handle()
-                        else:
-                            break
+                    else:
+                        # 跳过配网
+                        while True:
+                            print("跳过")
+                            if self.device(resourceId='com.govee.home:id/skip').exists(timeout=10):
+                                self.device(resourceId='com.govee.home:id/skip').click_exists(timeout=10)
+                                if self.device(resourceId="com.govee.home:id/btn_done").exists(timeout=10):
+                                    self.device(resourceId="com.govee.home:id/btn_done").click_exists(timeout=10)
+                                if self.device(resourceId="com.govee.home:id/iv_switch").exists(timeout=30):
+                                    break
+                                else:
+                                    print("跳过时出错")
+                                    self.error_handle()
+                            else:
+                                break
 
-                # 绑定完成   # 家电
-                if self.device(resourceId='com.govee.home:id/iv_switch').exists(timeout=30):
-                    add_success_num += 1
-                    print("配对配网后进入详情页成功次数：", add_success_num)
-                    self.get_log.info("配对配网后进入详情页成功次数：{}".format(add_success_num))
-                    new_time = datetime.now()
-                    now_time = new_time - self.old_time
-                    print("配对时长：", now_time)
-                    self.get_log.info("配对时长：{}".format(now_time))
-                    self.del_device()
+                    # 绑定完成   # 家电
+                    if self.device(resourceId='com.govee.home:id/iv_switch').exists(timeout=30):
+                        add_success_num += 1
+                        print("配对配网后进入详情页成功次数：", add_success_num)
+                        self.get_log.info("配对配网后进入详情页成功次数：{}".format(add_success_num))
+                        new_time = datetime.now()
+                        now_time = new_time - self.old_time
+                        print("配对时长：", now_time)
+                        self.get_log.info("配对时长：{}".format(now_time))
+                        self.del_device()
 
-            except Exception as e:
-                print("绑定出错：", e)
-                subprocess.call(['adb', 'shell', 'am', 'force-stop', 'com.govee.home'])
-                time.sleep(2)
-                self.device.app_start('com.govee.home')
-                if self.device(text=self.sku).exists(timeout=15):
-                    self.device(text=self.sku).click_exists(timeout=10)
-                    self.del_device()
+                except Exception as e:
+                    print("绑定出错：", e)
+                    subprocess.call(['adb', 'shell', 'am', 'force-stop', 'com.govee.home'])
+                    time.sleep(2)
+                    self.device.app_start('com.govee.home')
+                    if self.device(text=self.sku).exists(timeout=15):
+                        self.device(text=self.sku).click_exists(timeout=10)
+                        self.del_device()
 
     def down(self):
         self.device.swipe(0.5 * self.width, 0.9 * self.height, 0.5 * self.width,
@@ -211,8 +212,8 @@ class DistributionNetworkTest:
             else:
                 break
 
-    def thread_watch(self):
-        thread = threading.Thread(target=self.watch)
+    def thread_watch(self,stop_flag):
+        thread = threading.Thread(target=self.watch,args=(stop_flag,))
         thread.start()
 
     def thread_wifi_success_or_fail(self):
@@ -220,8 +221,8 @@ class DistributionNetworkTest:
         thread.start()
 
     # 处理弹窗
-    def watch(self):
-        while True:
+    def watch(self,stop_flag):
+        while not stop_flag.is_set():
             # print("复制到粘贴板")
             if self.device(text='知道了').exists():
                 self.device(text='知道了').click_exists(timeout=10)

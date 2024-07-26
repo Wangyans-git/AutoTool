@@ -23,7 +23,7 @@ class ConFig:
         self.ports_list = list(serial.tools.list_ports.comports())
         # print("ports_lsit:", self.ports_list)
         if len(self.ports_list) <= 0:
-            print("无串口设备。")
+            return False
         else:
             for comport in self.ports_list:
                 # print(list(comport)[0], list(comport)[1])  # 串口信息

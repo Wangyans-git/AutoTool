@@ -14,5 +14,5 @@ from package_qt.handle_qt import HandleQt
 if __name__ == '__main__':
     app = QApplication([])
     program = HandleQt()
-    program.ui.show()
+    program.show()
     sys.exit(app.exec_())

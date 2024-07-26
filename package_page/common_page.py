@@ -110,8 +110,8 @@ class CommonPage:
     处理弹窗
     """
 
-    def handle_pop(self):
-        while True:
+    def handle_pop(self,stop_flag):
+        while not stop_flag.is_set():
             print("弹窗")
             if self.device(resourceId='com.govee.home:id/btn_cancel').exists():
                 self.device(resourceId='com.govee.home:id/btn_cancel').click_exists(timeout=2)
